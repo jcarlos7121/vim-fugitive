@@ -3072,6 +3072,56 @@ function! fugitive#BufReadStatus(cmdbang) abort
     if !exists('b:dispatch')
       let b:dispatch = ':Git fetch --all'
     endif
+    call fugitive#MapJumps()
+    call s:Map('n', '-', ":<C-U>execute <SID>Do('Toggle',0)<CR>", '<silent>')
+    call s:Map('x', '-', ":<C-U>execute <SID>Do('Toggle',1)<CR>", '<silent>')
+    call s:Map('n', 's', ":<C-U>execute <SID>Do('Stage',0)<CR>", '<silent>')
+    call s:Map('x', 's', ":<C-U>execute <SID>Do('Stage',1)<CR>", '<silent>')
+    call s:Map('n', 'u', ":<C-U>execute <SID>Do('Unstage',0)<CR>", '<silent>')
+    call s:Map('x', 'u', ":<C-U>execute <SID>Do('Unstage',1)<CR>", '<silent>')
+    call s:Map('n', 'U', ":<C-U>Git reset -q<CR>", '<silent>')
+    call s:MapMotion('gu', "exe <SID>StageJump(v:count, 'Untracked', 'Unstaged')")
+    call s:MapMotion('gU', "exe <SID>StageJump(v:count, 'Unstaged', 'Untracked')")
+    call s:MapMotion('gs', "exe <SID>StageJump(v:count, 'Staged')")
+    call s:MapMotion('gp', "exe <SID>StageJump(v:count, 'Unpushed')")
+    call s:MapMotion('gP', "exe <SID>StageJump(v:count, 'Unpulled')")
+    call s:MapMotion('gr', "exe <SID>StageJump(v:count, 'Rebasing')")
+
+    call s:Map('n', 'gu',    ":Git pull<CR>")
+    call s:Map('n', 'gu<Space>',    ":Git pull<Space>")
+
+    call s:Map('n', 'C', ":echoerr 'fugitive: C has been removed in favor of cc'<CR>", '<silent><unique>')
+    call s:Map('n', 'a', ":<C-U>execute <SID>Do('Toggle',0)<CR>", '<silent>')
+    call s:Map('n', 'i', ":<C-U>execute <SID>NextExpandedHunk(v:count1)<CR>", '<silent>')
+    call s:Map('n', "=", ":<C-U>execute <SID>StageInline('toggle',line('.'),v:count)<CR>", '<silent>')
+    call s:Map('n', "<", ":<C-U>execute <SID>StageInline('hide',  line('.'),v:count)<CR>", '<silent>')
+    call s:Map('n', ">", ":<C-U>execute <SID>StageInline('show',  line('.'),v:count)<CR>", '<silent>')
+    call s:Map('x', "=", ":<C-U>execute <SID>StageInline('toggle',line(\"'<\"),line(\"'>\")-line(\"'<\")+1)<CR>", '<silent>')
+    call s:Map('x', "<", ":<C-U>execute <SID>StageInline('hide',  line(\"'<\"),line(\"'>\")-line(\"'<\")+1)<CR>", '<silent>')
+    call s:Map('x', ">", ":<C-U>execute <SID>StageInline('show',  line(\"'<\"),line(\"'>\")-line(\"'<\")+1)<CR>", '<silent>')
+    call s:Map('n', 'D', ":echoerr 'fugitive: D has been removed in favor of dd'<CR>", '<silent><unique>')
+    call s:Map('n', 'dd', ":<C-U>execute <SID>StageDiff('Gdiffsplit')<CR>", '<silent>')
+    call s:Map('n', 'dh', ":<C-U>execute <SID>StageDiff('Ghdiffsplit')<CR>", '<silent>')
+    call s:Map('n', 'ds', ":<C-U>execute <SID>StageDiff('Ghdiffsplit')<CR>", '<silent>')
+    call s:Map('n', 'dp', ":<C-U>execute <SID>StageDiffEdit()<CR>", '<silent>')
+    call s:Map('n', 'dv', ":<C-U>execute <SID>StageDiff('Gvdiffsplit')<CR>", '<silent>')
+    call s:Map('n', 'd?', ":<C-U>help fugitive_d<CR>", '<silent>')
+    call s:Map('n', 'P', ":<C-U>execute <SID>StagePatch(line('.'),line('.')+v:count1-1)<CR>", '<silent>')
+    call s:Map('x', 'P', ":<C-U>execute <SID>StagePatch(line(\"'<\"),line(\"'>\"))<CR>", '<silent>')
+    call s:Map('n', 'p', ":<C-U>if v:count<Bar>silent exe <SID>GF('pedit')<Bar>else<Bar>echoerr 'Use = for inline diff, P for :Git add/reset --patch, 1p for :pedit'<Bar>endif<CR>", '<silent>')
+    call s:Map('x', 'p', ":<C-U>execute <SID>StagePatch(line(\"'<\"),line(\"'>\"))<CR>", '<silent>')
+    call s:Map('n', 'I', ":<C-U>execute <SID>StagePatch(line('.'),line('.'))<CR>", '<silent>')
+    call s:Map('x', 'I', ":<C-U>execute <SID>StagePatch(line(\"'<\"),line(\"'>\"))<CR>", '<silent>')
+    call s:Map('n', 'gq', ":<C-U>if bufnr('$') == 1<Bar>quit<Bar>else<Bar>bdelete<Bar>endif<CR>", '<silent>')
+    call s:Map('n', 'R', ":echohl WarningMsg<Bar>echo 'Reloading is automatic.  Use :e to force'<Bar>echohl NONE<CR>", '<silent>')
+    call s:Map('n', 'g<Bar>', ":<C-U>echoerr 'Changed to X'<CR>", '<silent><unique>')
+    call s:Map('x', 'g<Bar>', ":<C-U>echoerr 'Changed to X'<CR>", '<silent><unique>')
+    call s:Map('n', 'X', ":<C-U>execute <SID>StageDelete(line('.'), 0, v:count)<CR>", '<silent>')
+    call s:Map('x', 'X', ":<C-U>execute <SID>StageDelete(line(\"'<\"), line(\"'>\"), v:count)<CR>", '<silent>')
+    call s:Map('n', 'gI', ":<C-U>execute <SID>StageIgnore(line('.'), line('.'), v:count)<CR>", '<silent>')
+    call s:Map('x', 'gI', ":<C-U>execute <SID>StageIgnore(line(\"'<\"), line(\"'>\"), v:count)<CR>", '<silent>')
+    call s:Map('n', '.', ':<C-U> <C-R>=<SID>StageArgs(0)<CR><Home>')
+    call s:Map('x', '.', ':<C-U> <C-R>=<SID>StageArgs(1)<CR><Home>')
     setlocal filetype=fugitive
 
     return s:DoAutocmd('User FugitiveIndex')
@@ -7841,6 +7891,17 @@ function! s:SquashArgument(...) abort
   return len(commit) && a:0 ? printf(a:1, commit) : commit
 endfunction
 
+function! s:SelectedCommit(...) abort
+  if &filetype == 'fugitive'
+    let commit = matchstr(getline('.'), '^\%(\%(\x\x\x\)\@!\l\+\s\+\)\=\zs[0-9a-f]\{4,\}\ze \|^' . s:ref_header . ': \zs\S\+')
+  elseif has_key(s:temp_files, s:cpath(expand('%:p')))
+    let commit = matchstr(getline('.'), '\S\@<!\x\{4,\}\>')
+  else
+    let commit = s:Owner(@%)
+  endif
+  return commit
+endfunction
+
 function! s:RebaseArgument() abort
   return s:SquashArgument(' %s^')
 endfunction
@@ -7926,6 +7987,9 @@ function! s:MapGitOps(is_ftplugin) abort
   exe s:Map('n', 'cA', ':<C-U>Git commit --edit --squash=<C-R>=<SID>SquashArgument()<CR>', '', ft)
   exe s:Map('n', 'c?', ':<C-U>help fugitive_c<CR>', '<silent>', ft)
 
+  exe s:Map('n', 'ch<Space>', ':Git cherry-pick<Space>')
+  exe s:Map('n', 'cl<Space>', ':Git log<Space>')
+  exe s:Map('n', 'cl<CR>', ':Git log<CR>')
   exe s:Map('n', 'cr<Space>', ':Git revert<Space>', '', ft)
   exe s:Map('n', 'cr<CR>', ':Git revert<CR>', '', ft)
   exe s:Map('n', 'crc', ':<C-U>Git revert <C-R>=<SID>SquashArgument()<CR><CR>', '<silent>', ft)
@@ -7957,6 +8021,9 @@ function! s:MapGitOps(is_ftplugin) abort
   exe s:Map('n', 'cb<Space>', ':Git branch<Space>', '', ft)
   exe s:Map('n', 'cb<CR>', ':Git branch<CR>', '', ft)
   exe s:Map('n', 'cb?', ':<C-U>help fugitive_cb<CR>', '<silent>', ft)
+
+  exe s:Map('n', 'ss', ':<C-U>Git reset --soft <C-R>=<SID>RebaseArgument()<CR><CR>', '<silent>')
+  exe s:Map('n', 'sh', ':<C-U>Git reset --hard <C-R>=<SID>RebaseArgument()<CR><CR>', '<silent>')
 
   exe s:Map('n', 'r<Space>', ':Git rebase<Space>', '', ft)
   exe s:Map('n', 'r<CR>', ':Git rebase<CR>', '', ft)
